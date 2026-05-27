@@ -43,9 +43,14 @@ from the CARLA simulator (Town07 off-road map).
 
 ## Progress Log
 
-| Week | Focus | Status |
-|------|-------|--------|
-| 1 | Environment setup, core reading | In progress |
-| 2 | Literature review — RL & baselines | Not started |
-| 3 | Literature review — transformers | Not started |
-| 4 | Specification & design | Not started |
+| Phase | Activity | Status |
+|-------|----------|--------|
+| Foundation | CARLA 0.9.16 setup, GitHub repo structure | ✅ Complete |
+| Foundation | Literature review — all areas covered | ✅ Complete |
+| Foundation | Preliminary project report submitted (30 Apr) | ✅ Complete |
+| Foundation | Core paper study — all 3 papers | ✅ Complete |
+| Foundation | HPC access requested | ✅ Complete |
+| Implementation | CARLA data collection pipeline | ⏳ Pending HPC |
+| Implementation | Decision Transformer + baselines | ⏳ Upcoming |
+| Evaluation | Full evaluation suite | ⏳ Upcoming |
+| Writing | Dissertation + video submission (6 Aug) | ⏳ Upcoming |
