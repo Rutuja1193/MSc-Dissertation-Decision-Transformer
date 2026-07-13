@@ -21,9 +21,8 @@ SCRATCH=/scratch/prj/inf_offroad_auto_nav
 CARLA_ROOT=$SCRATCH/carla
 CODE_ROOT=$SCRATCH/code
 
-# Add CARLA Python API to path
-export PYTHONPATH=$PYTHONPATH:$CARLA_ROOT/PythonAPI/carla/dist/carla-0.9.16-py3.10-linux-x86_64.egg
-export PYTHONPATH=$PYTHONPATH:$CARLA_ROOT/PythonAPI/carla
+# CARLA Python API installed via pip — verify
+python -c "import carla; print(f'CARLA version: {carla.__version__}')"
 
 # Start CARLA server in background
 echo "Starting CARLA server..."
@@ -51,11 +50,16 @@ fi
 # Run data collection
 echo "Starting data collection..."
 cd $CODE_ROOT/data_collection
-python collect_episodes.py
+python collect_episodes.py \
+    --num_episodes 500 \
+    --max_steps 500 \
+    --save_dir /scratch/prj/inf_offroad_auto_nav/data/raw
 
 # Run RTG computation and dataset preparation
 echo "Computing return-to-go and preparing dataset..."
-python compute_rtg.py
+python compute_rtg.py \
+    --raw_path /scratch/prj/inf_offroad_auto_nav/data/raw/episodes_final.pkl \
+    --save_path /scratch/prj/inf_offroad_auto_nav/data/processed/dataset.pkl
 
 # Kill CARLA server
 kill $CARLA_PID

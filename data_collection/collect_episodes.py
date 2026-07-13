@@ -146,9 +146,17 @@ def collect_dataset(
 
 
 if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--num_episodes', type=int, default=500)
+    parser.add_argument('--max_steps',    type=int, default=500)
+    parser.add_argument('--save_dir',     type=str, 
+                        default='../data/raw')
+    args = parser.parse_args()
+
     collect_dataset(
-        num_episodes=500,
-        max_steps_per_episode=500,
-        save_dir='../data/raw',
+        num_episodes=args.num_episodes,
+        max_steps_per_episode=args.max_steps,
+        save_dir=args.save_dir,
         save_every=50
     )

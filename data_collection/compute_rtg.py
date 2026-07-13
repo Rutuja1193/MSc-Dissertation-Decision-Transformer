@@ -148,7 +148,15 @@ def prepare_dataset(
 
 
 if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--raw_path',  type=str,
+                        default='../data/raw/episodes_final.pkl')
+    parser.add_argument('--save_path', type=str,
+                        default='../data/processed/dataset.pkl')
+    args = parser.parse_args()
+
     prepare_dataset(
-        raw_path='../data/raw/episodes_final.pkl',
-        save_path='../data/processed/dataset.pkl'
+        raw_path=args.raw_path,
+        save_path=args.save_path
     )
