@@ -21,8 +21,14 @@ SCRATCH=/scratch/prj/inf_offroad_auto_nav
 CARLA_ROOT=$SCRATCH/carla
 CODE_ROOT=$SCRATCH/code
 
-# CARLA Python API installed via pip — verify
-python -c "import carla; print(f'CARLA version: {carla.__version__}')"
+# Verify Python and CARLA client
+echo "Python: $(python --version)"
+python -c "import carla; print('CARLA client imported successfully')"
+
+# Set display variables for offscreen rendering
+export DISPLAY=
+export SDL_VIDEODRIVER=offscreen
+export SDL_HINT_CUDA_DEVICE=0
 
 # Start CARLA server in background
 echo "Starting CARLA server..."
@@ -30,22 +36,49 @@ $CARLA_ROOT/CarlaUE4.sh \
     -RenderOffScreen \
     -quality-level=Low \
     -carla-port=2000 \
-    -nosound &
+    -nosound \
+    -dx11 &
 
 CARLA_PID=$!
 echo "CARLA PID: $CARLA_PID"
 
-# Wait for CARLA to initialise
-echo "Waiting 30 seconds for CARLA to initialise..."
-sleep 30
+# Wait longer for CARLA to initialise on HPC
+echo "Waiting 60 seconds for CARLA to initialise..."
+sleep 60
 
-# Check CARLA is running
+# Check if CARLA process is still running
 if kill -0 $CARLA_PID 2>/dev/null; then
-    echo "CARLA server is running"
+    echo "CARLA server process is alive — attempting connection..."
 else
-    echo "ERROR: CARLA server failed to start"
-    exit 1
+    echo "CARLA process died — checking for crash log..."
+    # Try to find crash output
+    find $SCRATCH -name "crash*.log" 2>/dev/null
+    find /tmp -name "*carla*" 2>/dev/null
+    echo "Attempting restart with Vulkan..."
+    $CARLA_ROOT/CarlaUE4.sh \
+        -RenderOffScreen \
+        -quality-level=Low \
+        -carla-port=2000 \
+        -nosound &
+    CARLA_PID=$!
+    echo "Restarted CARLA PID: $CARLA_PID"
+    sleep 60
 fi
+
+# Test CARLA connection
+echo "Testing CARLA connection..."
+python -c "
+import carla
+import time
+try:
+    client = carla.Client('localhost', 2000)
+    client.set_timeout(30.0)
+    world = client.get_world()
+    print(f'CARLA connected: {world.get_map().name}')
+except Exception as e:
+    print(f'Connection failed: {e}')
+    exit(1)
+"
 
 # Run data collection
 echo "Starting data collection..."
@@ -55,14 +88,12 @@ python collect_episodes.py \
     --max_steps 500 \
     --save_dir /scratch/prj/inf_offroad_auto_nav/data/raw
 
-# Run RTG computation and dataset preparation
-echo "Computing return-to-go and preparing dataset..."
+# Run RTG computation
+echo "Computing return-to-go..."
 python compute_rtg.py \
     --raw_path /scratch/prj/inf_offroad_auto_nav/data/raw/episodes_final.pkl \
     --save_path /scratch/prj/inf_offroad_auto_nav/data/processed/dataset.pkl
 
-# Kill CARLA server
-kill $CARLA_PID
-echo "CARLA server stopped"
-
+# Kill CARLA
+kill $CARLA_PID 2>/dev/null
 echo "Job finished: $(date)"
