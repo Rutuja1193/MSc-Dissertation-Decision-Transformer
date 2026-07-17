@@ -213,4 +213,38 @@ def train(config=None):
 
 
 if __name__ == '__main__':
-    train()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--seed',           type=int,   default=0)
+    parser.add_argument('--dataset_path',   type=str,
+                        default='/scratch/prj/inf_offroad_auto_nav/data/processed/dataset.pkl')
+    parser.add_argument('--save_dir',       type=str,
+                        default='/scratch/prj/inf_offroad_auto_nav/models/checkpoints')
+    parser.add_argument('--n_epochs',       type=int,   default=100)
+    parser.add_argument('--batch_size',     type=int,   default=64)
+    parser.add_argument('--lr',             type=float, default=1e-4)
+    parser.add_argument('--context_length', type=int,   default=20)
+    parser.add_argument('--state_dim',      type=int,   default=17)
+    parser.add_argument('--action_dim',     type=int,   default=6)
+    args = parser.parse_args()
+
+    config = {
+        'dataset_path':   args.dataset_path,
+        'save_dir':       args.save_dir,
+        'state_dim':      args.state_dim,
+        'action_dim':     args.action_dim,
+        'hidden_dim':     128,
+        'n_layers':       3,
+        'n_heads':        1,
+        'context_length': args.context_length,
+        'dropout':        0.1,
+        'max_timestep':   1000,
+        'batch_size':     args.batch_size,
+        'lr':             args.lr,
+        'weight_decay':   0.1,
+        'n_epochs':       args.n_epochs,
+        'early_stop':     10,
+        'seed':           args.seed,
+    }
+
+    train(config)

@@ -23,11 +23,17 @@ CODE_ROOT=$SCRATCH/code
 # W&B key set via environment variable in ~/.bashrc
 echo "W&B API key: $WANDB_API_KEY" | cut -c1-20
 
-# Run training for 3 seeds
-echo "Training Decision Transformer..."
+# Train Decision Transformer for 3 seeds
 for SEED in 0 1 2; do
-    echo "Training seed $SEED..."
-    python $CODE_ROOT/models/train_dt.py --seed $SEED
+    echo "Training DT seed $SEED..."
+    python $CODE_ROOT/models/train_dt.py \
+        --seed $SEED \
+        --dataset_path $SCRATCH/data/processed/dataset.pkl \
+        --save_dir $SCRATCH/models/checkpoints \
+        --n_epochs 100 \
+        --state_dim 17 \
+        --action_dim 6
+    echo "Seed $SEED complete"
 done
 
 echo "Job finished: $(date)"
